@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>For Diya - A Love Eternal</title>
+    
+    <!-- Google Fonts: Playfair Display (Headings), Great Vibes (Romantic Script), Montserrat (Timer) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-dark: #0d0814;
+            --bg-light: #1a0f2e;
+            --rose-gold: #e0a96d;
+            --rose-gold-glow: rgba(224, 169, 109, 0.4);
+            --pink-glow: rgba(255, 182, 193, 0.3);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(224, 169, 109, 0.2);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-light) 100%);
+            color: #ffffff;
+            font-family: 'Playfair Display', serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            background-attachment: fixed;
+            user-select: none; /* Prevent text selection during interaction */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Typography Classes */
+        .font-script { font-family: 'Great Vibes', cursive; }
+        .font-timer { font-family: 'Montserrat', sans-serif; }
+        .text-rose-gold { color: var(--rose-gold); }
+
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            border-radius: 24px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        
+        .glass-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px 0 var(--rose-gold-glow);
+            border-color: rgba(224, 169, 109, 0.5);
+        }
+
+        /* Floating Hearts Animation */
+        .floating-heart {
+            position: fixed;
+            pointer-events: none;
+            color: var(--rose-gold);
+            font-size: 24px;
+            animation: floatUp 3s ease-in forwards;
+            z-index: 50;
+            filter: drop-shadow(0 0 8px var(--pink-glow));
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.8) rotate(0deg); opacity: 1; }
+            50% { transform: translateY(-100px) scale(1.2) rotate(20deg); opacity: 0.8; }
+            100% { transform: translateY(-200px) scale(1.5) rotate(-20deg); opacity: 0; }
+        }
+
+        /* Glowing Pulse Animation */
+        .glow-pulse {
+            animation: pulseGlow 3s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% { text-shadow: 0 0 10px var(--rose-gold-glow), 0 0 20px var(--pink-glow); }
+            100% { text-shadow: 0 0 20px var(--rose-gold), 0 0 40px var(--rose-gold); }
+        }
+
+        /* Carousel Fading */
+        .carousel-msg {
+            transition: opacity 1s ease-in-out;
+        }
+        
+        .hide-msg { opacity: 0; position: absolute; pointer-events: none; }
+        .show-msg { opacity: 1; position: relative; }
+
+        /* Canvas Positioning */
+        #ambient-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        #celebration-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-inline { background: var(--rose-gold); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--rose-gold); border-radius: 4px; }
+        
+        /* Floating Action Buttons */
+        .fab {
+            background: rgba(224, 169, 109, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(224, 169, 109, 0.3);
+            color: var(--rose-gold);
+            transition: all 0.3s ease;
+        }
+        .fab:hover {
+            background: rgba(224, 169, 109, 0.3);
+            transform: scale(1.1);
+            box-shadow: 0 0 15px var(--rose-gold-glow);
+        }
+    </style>
+</head>
+<body class="antialiased relative" id="body-container">
+
+    <canvas id="ambient-canvas"></canvas>
+    <canvas id="celebration-canvas"></canvas>
+
+    <!-- Controls -->
+    <div class="fixed top-6 right-6 flex flex-col gap-4 z-50">
+        <button id="audio-toggle" class="fab w-12 h-12 rounded-full flex items-center justify-center cursor-pointer shadow-lg group relative" title="Play Ambient Music">
+            <i class="fas fa-music"></i>
+            <span class="absolute right-14 bg-black/50 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-[var(--rose-gold)]">Play Music</span>
+        </button>
+        <button id="preview-toggle" class="fab w-12 h-12 rounded-full flex items-center justify-center cursor-pointer shadow-lg group relative" title="Preview Birthday Mode">
+            <i class="fas fa-gift"></i>
+            <span class="absolute right-14 bg-black/50 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-[var(--rose-gold)]">Preview Celebration</span>
+        </button>
+    </div>
+
+    <main class="relative z-10 container mx-auto px-4 py-16 flex flex-col items-center justify-center min-h-screen">
+        
+        <!-- Celebration Overlay Content (Hidden by default) -->
+        <div id="celebration-content" class="hidden flex-col items-center justify-center text-center mb-16 animate-[fadeIn_2s_ease-in]">
+            <h1 class="font-script text-7xl md:text-9xl text-rose-gold glow-pulse mb-6 tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-[#e0a96d] to-[#ffb6c1]">Happy Birthday, Diya!</h1>
+            <p class="text-xl md:text-3xl text-gray-200 italic max-w-3xl leading-relaxed">
+                Today the world celebrates the beautiful soul you are. You are my greatest gift, my brightest light, and my endless love. Let this day be as magnificent as you.
+            </p>
+        </div>
+
+        <!-- Normal State Content -->
+        <div id="normal-content" class="flex flex-col items-center text-center w-full">
+            <h2 class="text-sm md:text-base uppercase tracking-[0.4em] text-gray-400 mb-4 font-timer">Counting Down To Perfection</h2>
+            <h1 class="font-script text-6xl md:text-8xl text-rose-gold mb-12 glow-pulse tracking-wide">For Diya</h1>
+            
+            <!-- Countdown Timer Container -->
+            <div class="glass-panel p-8 md:p-12 w-full max-w-4xl mx-auto flex justify-center items-center">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12 text-center w-full">
+                    
+                    <div class="flex flex-col items-center">
+                        <span id="t-days" class="font-timer text-5xl md:text-7xl font-light text-white mb-2 shadow-sm drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">00</span>
+                        <span class="text-xs md:text-sm uppercase tracking-widest text-rose-gold">Days</span>
+                    </div>
+                    
+                    <div class="flex flex-col items-center">
+                        <span id="t-hours" class="font-timer text-5xl md:text-7xl font-light text-white mb-2 shadow-sm drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">00</span>
+                        <span class="text-xs md:text-sm uppercase tracking-widest text-rose-gold">Hours</span>
+                    </div>
+                    
+                    <div class="flex flex-col items-center">
+                        <span id="t-minutes" class="font-timer text-5xl md:text-7xl font-light text-white mb-2 shadow-sm drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">00</span>
+                        <span class="text-xs md:text-sm uppercase tracking-widest text-rose-gold">Minutes</span>
+                    </div>
+                    
+                    <div class="flex flex-col items-center">
+                        <span id="t-seconds" class="font-timer text-5xl md:text-7xl font-light text-white mb-2 shadow-sm drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">00</span>
+                        <span class="text-xs md:text-sm uppercase tracking-widest text-rose-gold">Seconds</span>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <p class="mt-8 text-gray-400 font-light tracking-wide text-sm md:text-base">Until January 13th</p>
+        </div>
+
+        <div class="mt-32 w-full max-w-3xl">
+            <h3 class="text-center font-script text-4xl text-rose-gold mb-8">Little notes for you</h3>
+            <div class="glass-panel p-10 min-h-[200px] flex items-center justify-center relative overflow-hidden cursor-pointer group" id="carousel-container" onclick="nextMessage()">
+                
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-[rgba(224,169,109,0.05)] to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]"></div>
+                
+                <div id="carousel-messages" class="text-center text-lg md:text-2xl font-light leading-relaxed italic text-gray-100">
+                    <!-- Messages populated via JS -->
+                </div>
+                
+                <div class="absolute bottom-4 right-4 text-rose-gold opacity-50 text-sm flex items-center gap-2">
+                    <span>Tap for next</span> <i class="fas fa-hand-pointer"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-32 w-full max-w-5xl mb-24">
+            <h3 class="text-center font-script text-4xl text-rose-gold mb-4">The Wish Jar</h3>
+            <p class="text-center text-gray-400 text-sm mb-12">Leave a timeless note for Diya.</p>
+            
+            <div class="glass-panel p-6 md:p-8 mb-12 max-w-2xl mx-auto">
+                <form id="wish-form" class="flex flex-col gap-4">
+                    <input type="text" id="wish-author" placeholder="Your Name" required class="bg-[rgba(0,0,0,0.2)] border border-[rgba(224,169,109,0.3)] rounded-xl p-4 text-white focus:outline-none focus:border-[var(--rose-gold)] transition-colors placeholder-gray-500 font-timer">
+                    <textarea id="wish-text" rows="3" placeholder="Write a beautiful wish..." required class="bg-[rgba(0,0,0,0.2)] border border-[rgba(224,169,109,0.3)] rounded-xl p-4 text-white focus:outline-none focus:border-[var(--rose-gold)] transition-colors placeholder-gray-500 font-timer resize-none"></textarea>
+                    <button type="submit" class="bg-gradient-to-r from-[#e0a96d] to-[#c28e57] text-[#0d0814] font-semibold py-4 rounded-xl shadow-[0_0_15px_rgba(224,169,109,0.4)] hover:shadow-[0_0_25px_rgba(224,169,109,0.7)] transition-all transform hover:-translate-y-1 mt-2 tracking-wider uppercase text-sm">
+                        Drop into Jar <i class="fas fa-paper-plane ml-2"></i>
+                    </button>
+                </form>
+        </div>
+
+            <div id="wish-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Wishes will be populated here by the database -->
+                <div class="glass-panel p-6 relative overflow-hidden group col-span-full text-center" id="loading-wishes">
+                    <p class="text-[var(--rose-gold)] font-light animate-pulse"><i class="fas fa-star mr-2"></i> Connecting to the stars...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'diya-birthday-app';
+        
+        // IF HOSTING ON NETLIFY: Paste your free Firebase config object here!
+        // Example: const myNetlifyFirebaseConfig = { apiKey: "xxx", authDomain: "xxx", projectId: "xxx" ... };
+        const myNetlifyFirebaseConfig = {
+            apiKey: "AIzaSyBHKfFzr_nQ6IyA7rbFD8hLO35NDeyG41o",
+            authDomain: "diya-birthday-wish.firebaseapp.com",
+            projectId: "diya-birthday-wish",
+            storageBucket: "diya-birthday-wish.firebasestorage.app",
+            messagingSenderId: "212205882025",
+            appId: "1:212205882025:web:6d9b520336635a80e4f7b8",
+            measurementId: "G-DFSM9MC5D4"
+        }; 
+        
+        const configStr = typeof __firebase_config !== 'undefined' ? __firebase_config : (myNetlifyFirebaseConfig ? JSON.stringify(myNetlifyFirebaseConfig) : null);
+        
+        const wishForm = document.getElementById('wish-form');
+        const wishGrid = document.getElementById('wish-grid');
+        const defaultWish = `
+                <div class="glass-panel p-6 relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-[var(--rose-gold)]"></div>
+                    <p class="text-gray-200 font-light italic mb-4">"May your year be as radiant, deeply beautiful, and uniquely wonderful as you are. Counting down every second until we celebrate you."</p>
+                    <p class="text-[var(--rose-gold)] font-script text-2xl text-right">- Forever Yours</p>
+                </div>
+        `;
+
+        if (!configStr) {
+            // Fallback for Netlify if no database config is provided yet
+            document.getElementById('loading-wishes').style.display = 'none';
+            wishGrid.innerHTML = defaultWish;
+            
+            wishForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const author = document.getElementById('wish-author').value;
+                const text = document.getElementById('wish-text').value;
+                
+                const newWish = document.createElement('div');
+                newWish.className = 'glass-panel p-6 relative overflow-hidden animate-[fadeIn_0.5s_ease-out] group';
+                newWish.innerHTML = `
+                    <div class="absolute top-0 left-0 w-1 h-full bg-[var(--rose-gold)]"></div>
+                    <p class="text-gray-200 font-light italic mb-4">"${escapeHtml(text)}"</p>
+                    <p class="text-[var(--rose-gold)] font-script text-2xl text-right">- ${escapeHtml(author)}</p>
+                `;
+                wishGrid.insertBefore(newWish, wishGrid.firstChild);
+                wishForm.reset();
+                fireHearts(wishForm.querySelector('button'));
+            });
+        } else {
+            // Connect to Cloud Database
+            const firebaseConfig = JSON.parse(configStr);
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            
+            // Note: If you use your own Firebase, you can simplify this collection path to just 'wishes'
+            const wishesCollection = collection(db, 'artifacts', appId, 'public', 'data', 'wishes');
+            let currentUser = null;
+
+            async function init() {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined') {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                    currentUser = auth.currentUser;
+                    
+                    onSnapshot(wishesCollection, (snapshot) => {
+                        const wishes = [];
+                        snapshot.forEach((doc) => wishes.push({ id: doc.id, ...doc.data() }));
+                        
+                        // Sort newest first
+                        wishes.sort((a, b) => (b.timestamp?.toMillis() || 0) - (a.timestamp?.toMillis() || 0));
+                        
+                        wishGrid.innerHTML = '';
+                        if (wishes.length === 0) {
+                            wishGrid.innerHTML = defaultWish;
+                        } else {
+                            wishes.forEach(wish => {
+                                const el = document.createElement('div');
+                                el.className = 'glass-panel p-6 relative overflow-hidden animate-[fadeIn_0.5s_ease-out] group';
+                                el.innerHTML = `
+                                    <div class="absolute top-0 left-0 w-1 h-full bg-[var(--rose-gold)]"></div>
+                                    <p class="text-gray-200 font-light italic mb-4">"${escapeHtml(wish.text)}"</p>
+                                    <p class="text-[var(--rose-gold)] font-script text-2xl text-right">- ${escapeHtml(wish.author)}</p>
+                                `;
+                                wishGrid.appendChild(el);
+                            });
+                        }
+                    }, (error) => {
+                        console.error("Database connection error:", error);
+                        wishGrid.innerHTML = defaultWish;
+                    });
+                } catch (e) {
+                    console.error("Auth error", e);
+                }
+            }
+
+            wishForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                if (!currentUser) return;
+
+                const author = document.getElementById('wish-author').value;
+                const text = document.getElementById('wish-text').value;
+                const btn = wishForm.querySelector('button');
+                const origHtml = btn.innerHTML;
+                
+                btn.innerHTML = 'Dropping... <i class="fas fa-spinner fa-spin ml-2"></i>';
+                btn.disabled = true;
+
+                try {
+                    await addDoc(wishesCollection, {
+                        author: author,
+                        text: text,
+                        timestamp: serverTimestamp(),
+                        userId: currentUser.uid
+                    });
+                    wishForm.reset();
+                    fireHearts(btn);
+                } catch (error) {
+                    console.error("Error writing to database:", error);
+                } finally {
+                    btn.innerHTML = origHtml;
+                    btn.disabled = false;
+                }
+            });
+
+            init();
+        }
+
+        function escapeHtml(str) {
+            return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function fireHearts(btnElement) {
+            const btnRect = btnElement.getBoundingClientRect();
+            for(let i=0; i<5; i++) {
+                setTimeout(() => {
+                    const evt = new MouseEvent('click', {
+                        clientX: btnRect.left + btnRect.width/2 + (Math.random() * 40 - 20),
+                        clientY: btnRect.top + (Math.random() * 20 - 10)
+                    });
+                    document.dispatchEvent(evt);
+                }, i * 150);
+            }
+        }
+    </script>
+
+    <script>
+        // --- Global Interaction: Floating Hearts on Click ---
+        document.addEventListener('click', function(e) {
+            // Don't spawn hearts if clicking buttons or inputs
+            if(e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            
+            const heart = document.createElement('i');
+            heart.className = 'fas fa-heart floating-heart';
+            heart.style.left = (e.clientX - 12) + 'px';
+            heart.style.top = (e.clientY - 12) + 'px';
+            
+            // Randomize color slightly
+            const colors = ['#e0a96d', '#ffb6c1', '#ffffff', '#ff69b4'];
+            heart.style.color = colors[Math.floor(Math.random() * colors.length)];
+            
+            // Randomize size
+            const size = Math.random() * 15 + 15;
+            heart.style.fontSize = size + 'px';
+            
+            document.body.appendChild(heart);
+            
+            // Remove after animation
+            setTimeout(() => {
+                heart.remove();
+            }, 3000);
+        });
+
+        // --- Carousel Logic ---
+        const messages = [
+            "Happy Birthday, Diya! May your special day be just as radiant as your smile—the brightest constellation in my universe.",
+            "Wishing you the happiest birthday, Diya! Every moment with you is a joy, and I hope your day feels like a beautiful dream come true.",
+            "Happy Birthday to the girl who makes even the most ordinary days feel extraordinary. I hope your celebration is as magical as you are, Diya!",
+            "Have a wonderful birthday, Diya! I hope your day is filled with pure joy and your laughter, which will always be my absolute favorite melody.",
+            "Happy Birthday, Diya! In a sea of people, your bright spirit always stands out. Wishing you a day full of love and attention.",
+            "Wishing the sweetest birthday to our birthday girl, Diya. I hope you celebrate today knowing how breathtakingly beautiful you are, inside and out.",
+            "Happy Birthday, Diya! Your kindness and grace inspire me every single day. May this year bring you all the happiness you deserve."
+        ];
+        
+        let currentMsgIndex = 0;
+        const msgContainer = document.getElementById('carousel-messages');
+        
+        function updateCarousel() {
+            // Fade out
+            msgContainer.style.opacity = 0;
+            
+            setTimeout(() => {
+                msgContainer.innerHTML = `<p class="carousel-msg">"${messages[currentMsgIndex]}"</p>`;
+                // Fade in
+                msgContainer.style.opacity = 1;
+            }, 500); // Wait for fade out
+        }
+
+        function nextMessage() {
+            currentMsgIndex = (currentMsgIndex + 1) % messages.length;
+            updateCarousel();
+        }
+
+        // Auto-rotate every 6 seconds
+        setInterval(nextMessage, 6000);
+        updateCarousel(); // Initial load
+
+        // --- STREAMING_CHUNK:Ambient Canvas Background Engine ---
+        const canvas = document.getElementById('ambient-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Orb {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = (Math.random() - 0.5) * 0.3;
+                this.speedY = (Math.random() - 0.5) * 0.3;
+                this.opacity = Math.random() * 0.5 + 0.1;
+                this.color = Math.random() > 0.5 ? '224, 169, 109' : '255, 182, 193'; // Rose gold or pink
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                
+                if (this.x > width) this.x = 0;
+                if (this.x < 0) this.x = width;
+                if (this.y > height) this.y = 0;
+                if (this.y < 0) this.y = height;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${this.color}, ${this.opacity})`;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = `rgba(${this.color}, ${this.opacity})`;
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const count = window.innerWidth < 768 ? 40 : 100;
+            for (let i = 0; i < count; i++) particles.push(new Orb());
+        }
+        initParticles();
+
+        function animateAmbient() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateAmbient);
+        }
+        animateAmbient();
+
+        // --- STREAMING_CHUNK:Perpetual Countdown Logic & Celebration Trigger ---
+        
+        // Element references
+        const elDays = document.getElementById('t-days');
+        const elHours = document.getElementById('t-hours');
+        const elMins = document.getElementById('t-minutes');
+        const elSecs = document.getElementById('t-seconds');
+        const normalContent = document.getElementById('normal-content');
+        const celebrationContent = document.getElementById('celebration-content');
+        const previewBtn = document.getElementById('preview-toggle');
+        const celebCanvas = document.getElementById('celebration-canvas');
+        
+        let isCelebrationMode = false;
+        let previewActive = false;
+
+        function getNextBirthday() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            // Target Jan 13 (Month 0 is Jan)
+            let bday = new Date(currentYear, 0, 13, 0, 0, 0);
+            
+            // If today is past Jan 13th, target next year
+            if (now.getTime() > bday.getTime() && (now.getMonth() !== 0 || now.getDate() !== 13)) {
+                bday = new Date(currentYear + 1, 0, 13, 0, 0, 0);
+            }
+            return bday;
+        }
+
+        function updateTimer() {
+            const now = new Date();
+            
+            // Check if it IS her birthday!
+            const isBirthday = now.getMonth() === 0 && now.getDate() === 13;
+            
+            if (isBirthday || previewActive) {
+                if (!isCelebrationMode) triggerCelebration();
+                // Set timer visual to zeros just in case it's visible during preview
+                elDays.innerText = '00'; elHours.innerText = '00';
+                elMins.innerText = '00'; elSecs.innerText = '00';
+                return;
+            } else if (isCelebrationMode && !previewActive) {
+                // Birthday ended, revert to normal
+                endCelebration();
+            }
+
+            const target = getNextBirthday();
+            const diff = target - now;
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const mins = Math.floor((diff / 1000 / 60) % 60);
+            const secs = Math.floor((diff / 1000) % 60);
+
+            // Add leading zeros and animate changes
+            updateDigit(elDays, days < 10 ? '0' + days : days);
+            updateDigit(elHours, hours < 10 ? '0' + hours : hours);
+            updateDigit(elMins, mins < 10 ? '0' + mins : mins);
+            updateDigit(elSecs, secs < 10 ? '0' + secs : secs);
+        }
+
+        function updateDigit(el, value) {
+            if (el.innerText !== value.toString()) {
+                el.innerText = value;
+                // Subtle pop effect on change
+                el.style.transform = 'scale(1.1)';
+                el.style.color = '#ffb6c1';
+                setTimeout(() => {
+                    el.style.transform = 'scale(1)';
+                    el.style.color = '#ffffff';
+                }, 150);
+            }
+        }
+
+        setInterval(updateTimer, 1000);
+        updateTimer(); // Initial call
+
+        // --- STREAMING_CHUNK:Birthday Celebration Mode & Fireworks Engine ---
+        
+        let fwCtx = null;
+        let fireworks = [];
+        let particlesFw = [];
+        let animFrameId = null;
+
+        function triggerCelebration() {
+            isCelebrationMode = true;
+            normalContent.classList.add('hidden');
+            celebrationContent.classList.remove('hidden');
+            celebCanvas.style.opacity = 1;
+            
+            fwCtx = celebCanvas.getContext('2d');
+            celebCanvas.width = window.innerWidth;
+            celebCanvas.height = window.innerHeight;
+            
+            if(!animFrameId) loopFireworks();
+            
+            // Play celebratory chord if music is already playing
+            if (isPlaying) {
+                playCelebrationChord();
+            }
+        }
+
+        function endCelebration() {
+            isCelebrationMode = false;
+            normalContent.classList.remove('hidden');
+            celebrationContent.classList.add('hidden');
+            celebCanvas.style.opacity = 0;
+            
+            setTimeout(() => {
+                if(animFrameId) cancelAnimationFrame(animFrameId);
+                animFrameId = null;
+                fireworks = [];
+                particlesFw = [];
+            }, 2000); // wait for fade out
+        }
+
+        previewBtn.addEventListener('click', () => {
+            previewActive = !previewActive;
+            if (previewActive) {
+                previewBtn.innerHTML = `<i class="fas fa-times"></i><span class="absolute right-14 bg-black/50 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity border border-[var(--rose-gold)]">Close Preview</span>`;
+                previewBtn.style.background = 'rgba(255, 182, 193, 0.4)';
+                updateTimer(); // Will trigger celebration
+            } else {
+                previewBtn.innerHTML = `<i class="fas fa-gift"></i><span class="absolute right-14 bg-black/50 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity border border-[var(--rose-gold)]">Preview Celebration</span>`;
+                previewBtn.style.background = '';
+                updateTimer(); // Will revert to normal
+            }
+        });
+
+        // Simple Fireworks Implementation
+        class Firework {
+            constructor() {
+                this.x = Math.random() * celebCanvas.width;
+                this.y = celebCanvas.height;
+                this.targetY = Math.random() * (celebCanvas.height / 2);
+                this.speed = Math.random() * 4 + 4;
+                this.color = `hsl(${Math.random() * 40 + 30}, 80%, 60%)`; // Golds/Pinks
+                this.dead = false;
+            }
+            update() {
+                this.y -= this.speed;
+                if (this.y <= this.targetY) {
+                    this.dead = true;
+                    explode(this.x, this.y, this.color);
+                }
+            }
+            draw() {
+                fwCtx.beginPath();
+                fwCtx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+                fwCtx.fillStyle = this.color;
+                fwCtx.fill();
+            }
+        }
+
+        class FwParticle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 5 + 1;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.alpha = 1;
+                this.decay = Math.random() * 0.02 + 0.01;
+            }
+            update() {
+                this.vx *= 0.95; // friction
+                this.vy += 0.05; // gravity
+                this.x += this.vx;
+                this.y += this.vy;
+                this.alpha -= this.decay;
+            }
+            draw() {
+                fwCtx.save();
+                fwCtx.globalAlpha = this.alpha;
+                fwCtx.beginPath();
+                fwCtx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                fwCtx.fillStyle = this.color;
+                fwCtx.fill();
+                fwCtx.restore();
+            }
+        }
+
+        function explode(x, y, color) {
+            for (let i = 0; i < 50; i++) particlesFw.push(new FwParticle(x, y, color));
+        }
+
+        function loopFireworks() {
+            if(!isCelebrationMode) return;
+            fwCtx.clearRect(0, 0, celebCanvas.width, celebCanvas.height);
+            
+            // Randomly launch fireworks
+            if (Math.random() < 0.05) fireworks.push(new Firework());
+
+            fireworks.forEach((fw, i) => {
+                fw.update();
+                fw.draw();
+                if (fw.dead) fireworks.splice(i, 1);
+            });
+
+            particlesFw.forEach((p, i) => {
+                p.update();
+                p.draw();
+                if (p.alpha <= 0) particlesFw.splice(i, 1);
+            });
+
+            animFrameId = requestAnimationFrame(loopFireworks);
+        }
+
+        window.addEventListener('resize', () => {
+            if(isCelebrationMode && celebCanvas) {
+                celebCanvas.width = window.innerWidth;
+                celebCanvas.height = window.innerHeight;
+            }
+        });
+
+        // --- MP3 Music Player (For Every Mile) ---
+
+        const audioBtn = document.getElementById('audio-toggle');
+        let isPlaying = false;
+
+        // Create the audio element pointing to the MP3 file
+        const bgMusic = new Audio('For_Every_Mile.mp3');
+        bgMusic.loop = true;
+        bgMusic.volume = 0.7;
+
+        audioBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                bgMusic.pause();
+                audioBtn.innerHTML = `<i class="fas fa-music"></i><span class="absolute right-14 bg-black/50 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity border border-[var(--rose-gold)]">Play Music</span>`;
+                audioBtn.classList.remove('glow-pulse');
+                isPlaying = false;
+            } else {
+                bgMusic.play().catch(err => console.warn('Audio play failed:', err));
+                audioBtn.innerHTML = `<i class="fas fa-volume-up"></i><span class="absolute right-14 bg-black/50 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity border border-[var(--rose-gold)]">Pause Music</span>`;
+                audioBtn.classList.add('glow-pulse');
+                isPlaying = true;
+            }
+        });
+
+        // Keep celebration chord working with Web Audio API
+        let audioCtx;
+        function initAudioCtx() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+        }
+
+        function playTone(freq, time, duration) {
+            initAudioCtx();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            const filter = audioCtx.createBiquadFilter();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, time);
+            filter.type = 'lowpass';
+            filter.frequency.value = 1000;
+            gainNode.gain.setValueAtTime(0, time);
+            gainNode.gain.linearRampToValueAtTime(0.1, time + duration * 0.2);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, time + duration);
+            osc.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start(time);
+            osc.stop(time + duration);
+        }
+
+        function playCelebrationChord() {
+            initAudioCtx();
+            const now = audioCtx.currentTime;
+            [261.63, 329.63, 392.00, 523.25].forEach((f, i) => {
+                playTone(f, now + i * 0.1, 8);
+            });
+        }
+
+    </script>
+</body>
+</html>
